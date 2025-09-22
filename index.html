@@ -1,36 +1,95 @@
-
-<style>
-body {
-  background-color: #fdf8f3 !important;
-  background-image: none !important;
+<!DOCTYPE html>
+<html><head><style>
+html, body { height: 100%; margin: 0; }
+body { background-color: #fdf8f3 !important; background-image: none !important; }
+#root { background-color: #fdf8f3 !important; }
+#soroban { background-color: #fdf8f3 !important; background-image: none !important; }
+#header-bar {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 9999;
 }
-#soroban {
-  background-color: #fdf8f3 !important;
-  background-image: none !important;
+#mw-logo {
+  width: 25px;
+  height: 25px;
+  display: block;
+  margin: 0 auto 5px auto;
 }
 #resetBtn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
   background-color: #ff914d;
-  color: white;
+  color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
+  border-radius: 10px;
+  padding: 8px 16px;
   font-size: 16px;
   font-family: 'Montserrat', sans-serif;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  transition: background-color 0.3s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, background-color 0.3s;
 }
-#resetBtn:hover {
-  background-color: #ff7a29;
-}
-</style>
-<!DOCTYPE html>
-
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<meta content="yes" name="apple-mobile-web-app-capable"/>
-<div id="root"></div><button id="resetBtn">Скинути</button>
-<script src="soroban.js"></script>
+#resetBtn:hover { background-color: #ff7a29; transform: scale(1.05); }
+#resetBtn:active { transform: scale(0.95); }
+</style></head><body><div id="header-bar"><img alt="MindWorld School" id="mw-logo" src="logo.png"/><button id="resetBtn">Скинути</button></div><!DOCTYPE html>
+<meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/><meta content="yes" name="apple-mobile-web-app-capable"/><div id="root"></div><script src="soroban.js"></script><script>
+(function(){
+  function doReset(){
+    if (location && typeof location.reload === 'function') location.reload();
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var b = document.getElementById('resetBtn');
+    if (b) b.addEventListener('click', doReset);
+  });
+  const map = new Map([
+    ["Reset","Скинути"],
+    ["Start","Почати"],
+    ["Check","Перевірити"],
+    ["Menu","Меню"],
+    ["Level","Рівень"],
+    ["About","Про програму"],
+    ["Settings","Налаштування"],
+    ["Help","Допомога"],
+    ["Practice","Практика"],
+    ["Trainer","Тренажер"],
+    ["Score","Рахунок"],
+    ["OK","Гаразд"],
+    ["Cancel","Скасувати"],
+    ["Close","Закрити"],
+  ]);
+  function translateNode(node){
+    if (node.nodeType === Node.TEXT_NODE){
+      const raw = node.nodeValue;
+      const text = raw.trim();
+      if (!text) return;
+      if (map.has(text)){
+        node.nodeValue = raw.replace(text, map.get(text));
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE){
+      const t = (node.textContent||"").trim();
+      if (map.has(t)) node.textContent = map.get(t);
+    }
+  }
+  function walk(root){
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, null);
+    let n;
+    while(n = walker.nextNode()){
+      translateNode(n);
+    }
+  }
+  function apply(){
+    walk(document.body || document);
+  }
+  const ready = () => {
+    apply();
+    const obs = new MutationObserver(() => apply());
+    obs.observe(document.body || document.documentElement, {childList:true, subtree:true, characterData:true});
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", ready);
+  } else {
+    ready();
+  }
+})();
+</script></body></html>
